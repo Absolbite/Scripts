@@ -1,0 +1,4 @@
+_G.Chat = _G.ChatTab:AddGlobalChat({
+    Topic     = "LegendsOfSpeed_GlobalChat_v1",
+    ServerUrl = "https://chat-relay-vercel.vercel.app",
+})
