@@ -1,6 +1,3 @@
-_G.ChatTab:AddParagraph({Title = "Join Discord", Text = " "})
-_G.ChatTab:AddParagraph({Title = "https://discord.gg/JgxSAr3eW", Text = " "})
-
 _G.Chat = _G.ChatTab:AddGlobalChat({
     Topic     = "ScriptBloxian_GlobalChat_v1",
     ServerUrl = "https://chat-relay-f58h.onrender.com",
