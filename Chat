@@ -1,4 +1,4 @@
-_G.rebirthParagraph = _G.RebirthTab:AddParagraph({
+_G.ChatParagraph = _G.ChatTab:AddParagraph({
     Title = "Chat is disabled",
     Text = " "
 })
