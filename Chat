@@ -1,6 +1,4 @@
-_G.Chat = _G.ChatTab:AddGlobalChat({
-    Topic       = "ScriptBloxian_GlobalChat_v1",
-    ServerUrl   = "https://chat-relay-f58h.onrender.com",
-    PublicChat  = true,
-    PrivateChat = true,
+_G.rebirthParagraph = _G.RebirthTab:AddParagraph({
+    Title = "Chat is disabled",
+    Text = " "
 })
