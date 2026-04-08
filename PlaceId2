@@ -5,7 +5,7 @@ local PlaceScripts = {
     [3232996272]      = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/LS",
     [3276265788]      = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/LS",
     [3956818381]      = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/NL",
-    [78754030900809]      = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/ALeveling",
+    [78754030900809]      = "https://raw.githubusercontent.com/Absolbite/ALevel/refs/heads/main/Loader",
     [117562712988401] = "https://raw.githubusercontent.com/Absolbite/AEVO/refs/heads/main/Loader"
 }
 
