@@ -7,7 +7,7 @@ local PlaceScripts = {
     [3956818381]      = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/NL",
     [78754030900809]  = "https://raw.githubusercontent.com/Absolbite/ALevel/refs/heads/main/Loader",
     [117562712988401] = "https://raw.githubusercontent.com/Absolbite/AEVO/refs/heads/main/Loader",
-    [111173250236559] = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/ACrash"
+    [111173250236559] = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/ACrash-Loader"
 }
 
 local placeId = game.PlaceId
