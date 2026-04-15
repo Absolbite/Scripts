@@ -51,7 +51,7 @@ _G.SummonTab = Window:MakeTab({ Title = "》Summon《" })
 _G.MiscTab   = Window:MakeTab({ Title = "》Misc《" })
 _G.SettingsTab   = Window:MakeTab({ Title = "》Settings《" })
 
-_G.KEY = "\006"
+_G.KEY = "\005"
 
 local function loadModule(url)
     pcall(function()
