@@ -44,9 +44,6 @@ end
 _G.Window = Window
 
 _G.Key    = "\002"
-_G.NumberOne = "3"
-_G.NumberTwo = "4"
-_G.NumberFour = "5"
 
 local function fireRemote(args)
     pcall(function()
@@ -62,29 +59,1727 @@ _G.StarsTab = Window:MakeTab({ Title = "》Stars《" })
 _G.MiscTab  = Window:MakeTab({ Title = "》Misc《" })
 _G.SettingsTab   = Window:MakeTab({ Title = "》Settings《" })
 
-local function loadModule(url)
-    pcall(function()
-        loadstring(game:HttpGet(url))()
-    end)
+_G.DiscordSection = _G.DiscordTab:AddSection({
+	Name = "Community",
+	Open = true
+})
+
+local DISCORD_LINK = "https://discord.gg/JgxSAr3eW"
+
+_G.DiscordSection:AddDiscordInvite({
+    Title = "Join our Discord!",
+    Logo = "rbxassetid://125484525486902",
+    Invite = DISCORD_LINK
+})
+
+_G.StatusTab:AddParagraph({
+    Title = "Version 1.0.1",
+    Text = "World Fighters [Beta]"
+})
+
+_G.PlayerSection = _G.MainTab:AddSection({
+    Name = "LocalPlayer",
+    Open = false
+})
+
+_G.SpeedConnection = nil
+
+_G.PlayerSection:AddSlider({
+    Title = "Cframe Speed",
+    Min = 16,
+    Max = 200,
+    Default = 16,
+    Flag = "speed_value",
+    Callback = function(value)
+        _G.CurrentSpeed = value
+    end
+})
+
+_G.PlayerSection:AddToggle({
+    Title = "Set Speed",
+    Default = false,
+    Flag = "set_speed",
+    Callback = function(state)
+        if state then
+            if _G.SpeedConnection then
+                _G.SpeedConnection:Disconnect()
+                _G.SpeedConnection = nil
+            end
+
+            _G.SpeedConnection = game:GetService("RunService").RenderStepped:Connect(function(dt)
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                if not char then return end
+
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local hum = char:FindFirstChild("Humanoid")
+                if not hrp or not hum then return end
+
+                local moveDir = hum.MoveDirection
+                if moveDir.Magnitude > 0 then
+                    hrp.CFrame = hrp.CFrame + (moveDir * (_G.CurrentSpeed or 16) * dt)
+                end
+            end)
+        else
+            if _G.SpeedConnection then
+                _G.SpeedConnection:Disconnect()
+                _G.SpeedConnection = nil
+            end
+        end
+    end
+})
+
+_G.PlayerSection:AddSlider({
+    Title = "Jump Power",
+    Min = 50,
+    Max = 500,
+    Default = 50,
+    Flag = "jump_power",
+    Callback = function(value)
+        _G.CurrentJump = value
+        if _G.JumpLoop then
+            local hum = _G.GetHumanoid()
+            if hum then
+                if hum.UseJumpPower then
+                    hum.JumpPower = _G.CurrentJump
+                else
+                    hum.JumpHeight = _G.CurrentJump / 2
+                end
+            end
+        end
+    end
+})
+
+_G.PlayerSection:AddToggle({
+    Title = "Set Jump Power",
+    Default = false,
+    Flag = "set_jump",
+    Callback = function(state)
+        _G.JumpLoop = state
+        if state then
+            task.spawn(function()
+                while _G.JumpLoop do
+                    local hum = _G.GetHumanoid()
+                    if hum then
+                        if hum.UseJumpPower then
+                            hum.JumpPower = _G.CurrentJump
+                        else
+                            hum.JumpHeight = _G.CurrentJump / 2
+                        end
+                    end
+                    task.wait(0.1)
+                end
+                local hum = _G.GetHumanoid()
+                if hum then
+                    hum.JumpPower = 50
+                    hum.JumpHeight = 7.2
+                end
+            end)
+        else
+            local hum = _G.GetHumanoid()
+            if hum then
+                hum.JumpPower = 50
+                hum.JumpHeight = 7.2
+            end
+        end
+    end
+})
+
+_G.AutomaticallySection = _G.MainTab:AddSection({
+    Name = "Automatically",
+    Open = false
+})
+
+_G.AutoTrain = false
+_G.AutoAwake = false
+_G.AutoAchievements = false
+_G.ClaimDailyReward = false
+_G.ClaimTimeReward = false
+_G.AutoDaily = false
+_G.AutoGroup = false
+_G.AutoVip = false
+
+_G.AutomaticallySection:AddToggle({
+    Title   = "Auto Train",
+    Default = false,
+    Flag    = "auto_train",
+    Callback = function(state)
+        _G.AutoTrain = state
+        if state then
+            task.spawn(function()
+                while _G.AutoTrain do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Attack",
+                                "Click",
+                                {},
+                                n = 4
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(0)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddToggle({
+    Title = "Auto Awakening",
+    Default = false,
+    Flag = "auto_awake",
+    Callback = function(state)
+        _G.AutoAwake = state
+        if state then
+            task.spawn(function()
+                while _G.AutoAwake do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Awakening",
+                                "Awaken",
+                                n = 3
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(20)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddToggle({
+    Title = "Auto Claim All Achievements",
+    Default = false,
+    Flag = "auto_achievements",
+    Callback = function(state)
+        _G.AutoAchievements = state
+        if state then
+            task.spawn(function()
+                while _G.AutoAchievements do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Achievements",
+                                "ClaimAll",
+                                n = 3
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(300)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddDivider("》Time Reward / Daily Reward《")
+
+_G.AutomaticallySection:AddToggle({
+    Title   = "Claim Time Reward",
+    Default = false,
+    Flag    = "claim_time_reward",
+    Callback = function(state)
+        _G.ClaimTimeReward = state
+        if state then
+            task.spawn(function()
+                while _G.ClaimTimeReward do
+                    for i = 1, 7 do
+                        if not _G.ClaimTimeReward then break end
+                        fireRemote({
+                            {
+                                {
+                                    "General",
+                                    "TimeRewards",
+                                    "Claim",
+                                    i,
+                                    n = 4
+                                },
+                                _G.Key
+                            }
+                        })
+                        task.wait(1)
+                    end
+                    task.wait(50)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddToggle({
+    Title   = "Claim Daily Reward",
+    Default = false,
+    Flag    = "claim_daily_reward",
+    Callback = function(state)
+        _G.ClaimDailyReward = state
+        if state then
+            task.spawn(function()
+                while _G.ClaimDailyReward do
+                    for i = 1, 7 do
+                        if not _G.ClaimDailyReward then break end
+                        fireRemote({
+                            {
+                                {
+                                    "General",
+                                    "DailyRewards",
+                                    "Claim",
+                                    i,
+                                    n = 4
+                                },
+                                _G.Key
+                            }
+                        })
+                        task.wait(1)
+                    end
+                    task.wait(300)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddDivider("》Chests《")
+
+_G.AutomaticallySection:AddToggle({
+    Title   = "Auto Claim Daily Chest",
+    Default = false,
+    Flag    = "auto_claim_daily",
+    Callback = function(state)
+        _G.AutoDaily = state
+        if state then
+            task.spawn(function()
+                while _G.AutoDaily do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Chests",
+                                "Claim",
+                                "Daily Chest",
+                                n = 4
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(300)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddToggle({
+    Title   = "Auto Claim Group Chest",
+    Default = false,
+    Flag    = "auto_claim_group",
+    Callback = function(state)
+        _G.AutoGroup = state
+        if state then
+            task.spawn(function()
+                while _G.AutoGroup do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Chests",
+                                "Claim",
+                                "Group Chest",
+                                n = 4
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(600)
+                end
+            end)
+        end
+    end
+})
+
+_G.AutomaticallySection:AddToggle({
+    Title   = "Auto Claim VIP Chest",
+    Default = false,
+    Flag    = "auto_claim_vip",
+    Callback = function(state)
+        _G.AutoVip = state
+        if state then
+            task.spawn(function()
+                while _G.AutoVip do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Chests",
+                                "Claim",
+                                "VIP Chest",
+                                n = 4
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(900)
+                end
+            end)
+        end
+    end
+})
+
+_G.EnemySection = _G.EnemyTab:AddSection({
+    Name = "Enemy",
+    Open = false
+})
+
+_G.SelectedPriority  = "Nearest"
+_G.SelectedWorld     = nil
+_G.SelectedLocation  = nil
+_G.SelectedEnemies   = {}
+_G.AutoTpEnemy       = false
+_G.AutoAttack        = false
+_G.InTrial           = false
+
+local DIFFICULTY_RANK = {
+    Easy   = 1,
+    Medium = 2,
+    Hard   = 3,
+    Insane = 4,
+    Boss   = 5,
+}
+
+local function getWorldsFolder()
+    return workspace:FindFirstChild("Server")
+        and workspace.Server:FindFirstChild("Enemies")
+        and workspace.Server.Enemies:FindFirstChild("World")
 end
 
-task.spawn(function()
+local function getGamemodesFolder()
+    return workspace:FindFirstChild("Server")
+        and workspace.Server:FindFirstChild("Enemies")
+        and workspace.Server.Enemies:FindFirstChild("Gamemodes")
+end
 
-    local base = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/"
+local function getWorldsList()
+    local folder = getWorldsFolder()
+    if not folder then return {"No Worlds Found"} end
+    local list = {}
+    for _, child in pairs(folder:GetChildren()) do
+        table.insert(list, child.Name)
+    end
+    table.sort(list)
+    return #list > 0 and list or {"No Worlds Found"}
+end
 
-    local modules = {
-        "WF",
-    }
+local function getLocationsList(worldName)
+    local folder = getWorldsFolder()
+    if not folder or not worldName then return {"No Locations Found"} end
+    local worldFolder = folder:FindFirstChild(worldName)
+    if not worldFolder then return {"No Locations Found"} end
+    local list = {}
+    for _, child in pairs(worldFolder:GetChildren()) do
+        table.insert(list, child.Name)
+    end
+    table.sort(list)
+    return #list > 0 and list or {"No Locations Found"}
+end
 
-    for _, name in ipairs(modules) do
-        loadModule(base .. name)
+local function getEnemiesList(worldName, locationName)
+    local folder = getWorldsFolder()
+    if not folder or not worldName or not locationName then return {"No Enemies Found"} end
+    local locFolder = folder:FindFirstChild(worldName)
+        and folder[worldName]:FindFirstChild(locationName)
+    if not locFolder then return {"No Enemies Found"} end
+    local list = {}
+    local seen = {}
+    for _, enemy in pairs(locFolder:GetChildren()) do
+        local name = enemy.Name
+        if not seen[name] then
+            seen[name] = true
+            table.insert(list, name)
+        end
+    end
+    table.sort(list)
+    return #list > 0 and list or {"No Enemies Found"}
+end
+
+local function isEnemyAlive(enemy)
+    return enemy:GetAttribute("Died") ~= true
+end
+
+local function getEnemyPosition(enemy)
+    if enemy:IsA("BasePart") then
+        return enemy.Position
+    elseif enemy:IsA("Model") then
+        local hrp = enemy:FindFirstChild("HumanoidRootPart")
+        if hrp then return hrp.Position end
+        local pp = enemy.PrimaryPart
+        if pp then return pp.Position end
+    end
+    return nil
+end
+
+_G.GetTargetEnemy = function()
+    local folder = getWorldsFolder()
+    if not folder or not _G.SelectedWorld or not _G.SelectedLocation then return nil end
+    local locFolder = folder:FindFirstChild(_G.SelectedWorld)
+        and folder[_G.SelectedWorld]:FindFirstChild(_G.SelectedLocation)
+    if not locFolder then return nil end
+    local hrp = _G.GetRoot()
+    if not hrp then return nil end
+    local hrpPos   = hrp.Position
+    local best     = nil
+    local bestDist = math.huge
+    for _, spawnPoint in pairs(locFolder:GetChildren()) do
+        if next(_G.SelectedEnemies) ~= nil and not _G.SelectedEnemies[spawnPoint.Name] then
+            continue
+        end
+        local pos = getEnemyPosition(spawnPoint)
+        if not pos then continue end
+        local dist = (hrpPos - pos).Magnitude
+        if dist < bestDist then
+            bestDist = dist
+            best     = spawnPoint
+        end
+    end
+    return best
+end
+
+_G.GetTargetEnemyAlive = function()
+    local folder = getWorldsFolder()
+    if not folder or not _G.SelectedWorld or not _G.SelectedLocation then return nil end
+    local locFolder = folder:FindFirstChild(_G.SelectedWorld)
+        and folder[_G.SelectedWorld]:FindFirstChild(_G.SelectedLocation)
+    if not locFolder then return nil end
+    local hrp = _G.GetRoot()
+    if not hrp then return nil end
+    local hrpPos     = hrp.Position
+    local candidates = {}
+    for _, spawnPoint in pairs(locFolder:GetChildren()) do
+        if next(_G.SelectedEnemies) ~= nil and not _G.SelectedEnemies[spawnPoint.Name] then
+            continue
+        end
+        if not isEnemyAlive(spawnPoint) then continue end
+        local pos = getEnemyPosition(spawnPoint)
+        if not pos then continue end
+        local dist       = (hrpPos - pos).Magnitude
+        local maxHealth  = spawnPoint:GetAttribute("MaxHealth") or 0
+        local difficulty = spawnPoint:GetAttribute("Difficulty") or "Easy"
+        local rank       = DIFFICULTY_RANK[difficulty] or 1
+        table.insert(candidates, {
+            instance  = spawnPoint,
+            pos       = pos,
+            dist      = dist,
+            maxHealth = maxHealth,
+            rank      = rank,
+        })
+    end
+    if #candidates == 0 then return nil end
+    local priority = _G.SelectedPriority
+    if priority == "Nearest" then
+        table.sort(candidates, function(a, b) return a.dist < b.dist end)
+    elseif priority == "Random" then
+        return candidates[math.random(1, #candidates)].instance
+    elseif priority == "Weak To Strong" then
+        table.sort(candidates, function(a, b) return a.rank < b.rank end)
+    elseif priority == "Strong To Weak" then
+        table.sort(candidates, function(a, b) return a.rank > b.rank end)
+    end
+    return candidates[1].instance
+end
+
+_G.EnemySection:AddDivider("》Settings《")
+
+_G.EnemySection:AddDropdown({
+    Title   = "Select Priority",
+    Options = {"Nearest", "Random", "Weak To Strong", "Strong To Weak"},
+    Default = "Nearest",
+    Flag    = "select_priority_enemy",
+    Callback = function(v)
+        _G.SelectedPriority = type(v) == "table" and v[1] or v
+    end
+})
+
+_G.WorldDropdown = _G.EnemySection:AddDropdown({
+    Title   = "Select World",
+    Options = getWorldsList(),
+    Flag    = "select_world_enemy",
+    Callback = function(v)
+        _G.SelectedWorld = type(v) == "table" and v[1] or v
+        if _G.LocationDropdown then
+            _G.LocationDropdown:Set(getLocationsList(_G.SelectedWorld), false)
+        end
+        _G.SelectedLocation = nil
+        _G.SelectedEnemies  = {}
+        if _G.EnemyDropdown then
+            _G.EnemyDropdown:Set({"No Enemies Found"}, false)
+        end
+    end
+})
+
+_G.EnemySection:AddButton({
+    Title = "Refresh World List",
+    Callback = function()
+        _G.WorldDropdown:Set(getWorldsList(), false)
+    end
+})
+
+_G.EnemySection:AddDivider("》Enemies《")
+
+_G.LocationDropdown = _G.EnemySection:AddDropdown({
+    Title   = "Select Location",
+    Options = {"No Locations Found"},
+    Flag    = "select_location_enemy",
+    Callback = function(v)
+        _G.SelectedLocation = type(v) == "table" and v[1] or v
+        if _G.EnemyDropdown then
+            _G.EnemyDropdown:Set(getEnemiesList(_G.SelectedWorld, _G.SelectedLocation), false)
+        end
+        _G.SelectedEnemies = {}
+    end
+})
+
+_G.EnemySection:AddButton({
+    Title = "Refresh Location List",
+    Callback = function()
+        if _G.LocationDropdown then
+            _G.LocationDropdown:Set(getLocationsList(_G.SelectedWorld), false)
+        end
+    end
+})
+
+_G.EnemyDropdown = _G.EnemySection:AddDropdown({
+    Title       = "Select Enemy",
+    Options     = {"No Enemies Found"},
+    MultiSelect = true,
+    Flag        = "select_enemy_wf",
+    Callback    = function(v)
+        _G.SelectedEnemies = {}
+        if type(v) == "table" then
+            for _, name in pairs(v) do
+                _G.SelectedEnemies[name] = true
+            end
+        end
+    end
+})
+
+_G.EnemySection:AddButton({
+    Title = "Refresh Enemy List",
+    Callback = function()
+        if _G.EnemyDropdown then
+            _G.EnemyDropdown:Set(getEnemiesList(_G.SelectedWorld, _G.SelectedLocation), false)
+        end
+    end
+})
+
+_G.EnemySection:AddToggle({
+    Title   = "Auto Attack",
+    Default = false,
+    Flag    = "auto_attack_wf",
+    Callback = function(state)
+        _G.AutoAttack = state
+        if state then
+            task.spawn(function()
+                while _G.AutoAttack do
+                    if not _G.InTrial then
+                        local spawnPoint = _G.GetTargetEnemy()
+                        if spawnPoint then
+                            local id = spawnPoint:GetAttribute("ID")
+                            if id then
+                                fireRemote({
+                                    {
+                                        {
+                                            "General",
+                                            "Attack",
+                                            "Click",
+                                            { [id] = true },
+                                            n = 3
+                                        },
+                                        _G.Key
+                                    }
+                                })
+                            end
+                        end
+                    end
+                    task.wait(0)
+                end
+            end)
+        end
+    end
+})
+
+_G.EnemySection:AddToggle({
+    Title   = "Auto Tp Enemy",
+    Default = false,
+    Flag    = "auto_tp_enemy_wf",
+    Callback = function(state)
+        _G.AutoTpEnemy = state
+        if state then
+            task.spawn(function()
+                while _G.AutoTpEnemy do
+                    if not _G.InTrial then
+                        local spawnPoint = _G.GetTargetEnemyAlive()
+                        if spawnPoint then
+                            local myHrp = _G.GetRoot()
+                            local pos   = getEnemyPosition(spawnPoint)
+                            if myHrp and pos then
+                                pcall(function() myHrp.CFrame = CFrame.new(pos) end)
+                            end
+                        end
+                    end
+                    task.wait(0)
+                end
+            end)
+        end
+    end
+})
+
+_G.TrialSection = _G.EnemyTab:AddSection({
+    Name = "Trial",
+    Open = false
+})
+
+_G.SelectedTrial     = "Trial Easy"
+_G.SelectedExitWorld = nil
+_G.SelectedExitLoc   = 1
+_G.MaxWave           = 50
+_G.AutoJoinTrial     = false
+_G.TrialAutoAttack   = false
+_G.TrialAutoTp       = false
+
+local TRIAL_OPTIONS = {"Trial Easy", "Trial Medium", "Trial Hard"}
+
+local function getTrialFolder(trialName)
+    local gm = getGamemodesFolder()
+    if not gm then return nil end
+    return gm:FindFirstChild(trialName)
+end
+
+local function isInTrial(trialName)
+    local folder = getTrialFolder(trialName)
+    return folder and #folder:GetChildren() > 0
+end
+
+local function getCurrentWave(trialName)
+    local ok, result = pcall(function()
+        return game:GetService("Players").LocalPlayer.PlayerGui
+            .UI.HUD.Gamemodes[trialName].Main.Wave.Value.ContentText
+    end)
+    if not ok or not result then return 0 end
+    local current = tonumber(result:match("^%s*(%d+)"))
+    return current or 0
+end
+
+local function getNearestTrialEnemy(trialName)
+    local folder = getTrialFolder(trialName)
+    if not folder then return nil end
+    local hrp = _G.GetRoot()
+    if not hrp then return nil end
+    local hrpPos   = hrp.Position
+    local best     = nil
+    local bestDist = math.huge
+    for _, enemy in pairs(folder:GetChildren()) do
+        local pos = getEnemyPosition(enemy)
+        if not pos then continue end
+        local dist = (hrpPos - pos).Magnitude
+        if dist < bestDist then
+            bestDist = dist
+            best     = enemy
+        end
+    end
+    return best
+end
+
+local function getNearestTrialEnemyAlive(trialName)
+    local folder = getTrialFolder(trialName)
+    if not folder then return nil end
+    local hrp = _G.GetRoot()
+    if not hrp then return nil end
+    local hrpPos   = hrp.Position
+    local best     = nil
+    local bestDist = math.huge
+    for _, enemy in pairs(folder:GetChildren()) do
+        if not isEnemyAlive(enemy) then continue end
+        local pos = getEnemyPosition(enemy)
+        if not pos then continue end
+        local dist = (hrpPos - pos).Magnitude
+        if dist < bestDist then
+            bestDist = dist
+            best     = enemy
+        end
+    end
+    return best
+end
+
+local function fireJoinTrial(trialName)
+    fireRemote({
+        {
+            {
+                "General",
+                "Gamemodes",
+                "Join",
+                trialName,
+                n = 4
+            },
+            _G.Key
+        }
+    })
+end
+
+local function fireExitTrial()
+    if not _G.SelectedExitWorld then return end
+    fireRemote({
+        {
+            {
+                "Player",
+                "Teleport",
+                "Teleport",
+                _G.SelectedExitWorld,
+                _G.SelectedExitLoc,
+                n = 5
+            },
+            _G.Key
+        }
+    })
+end
+
+_G.TrialSection:AddDivider("》Settings《")
+
+_G.TrialSection:AddTextBox({
+    Title           = "Max Wave",
+    PlaceholderText = "50",
+    Default         = "50",
+    Flag            = "trial_max_wave",
+    Callback = function(v)
+        _G.MaxWave = tonumber(v) or 50
+    end
+})
+
+_G.TrialSection:AddDropdown({
+    Title   = "Select Trial",
+    Options = TRIAL_OPTIONS,
+    Default = "Trial Easy",
+    Flag    = "select_trial",
+    Callback = function(v)
+        _G.SelectedTrial = type(v) == "table" and v[1] or v
+    end
+})
+
+_G.TrialSection:AddDropdown({
+    Title   = "Exit Trial To World",
+    Options = getWorldsList(),
+    Flag    = "trial_exit_world",
+    Callback = function(v)
+        _G.SelectedExitWorld = type(v) == "table" and v[1] or v
+    end
+})
+
+_G.TrialSection:AddDropdown({
+    Title   = "Location",
+    Options = {"1", "2"},
+    Default = "1",
+    Flag    = "trial_exit_location",
+    Callback = function(v)
+        local val = type(v) == "table" and v[1] or v
+        _G.SelectedExitLoc = tonumber(val) or 1
+    end
+})
+
+_G.TrialSection:AddDivider("》Enemies《")
+
+_G.TrialSection:AddToggle({
+    Title   = "Auto Join Trial",
+    Default = false,
+    Flag    = "auto_join_trial",
+    Callback = function(state)
+        _G.AutoJoinTrial = state
+        if state then
+            task.spawn(function()
+                while _G.AutoJoinTrial do
+                    local trialName = _G.SelectedTrial
+                    if not isInTrial(trialName) then
+                        _G.InTrial = false
+                        fireJoinTrial(trialName)
+                        task.wait(3)
+                    else
+                        _G.InTrial = true
+                        local wave = getCurrentWave(trialName)
+                        if wave >= _G.MaxWave then
+                            _G.InTrial = false
+                            fireExitTrial()
+                            task.wait(3)
+                        end
+                    end
+                    task.wait(1)
+                end
+                _G.InTrial = false
+            end)
+        else
+            _G.InTrial = false
+        end
+    end
+})
+
+_G.TrialSection:AddToggle({
+    Title   = "Auto Attack",
+    Default = false,
+    Flag    = "trial_auto_attack",
+    Callback = function(state)
+        _G.TrialAutoAttack = state
+        if state then
+            task.spawn(function()
+                while _G.TrialAutoAttack do
+                    if _G.InTrial then
+                        local enemy = getNearestTrialEnemy(_G.SelectedTrial)
+                        if enemy then
+                            local id = enemy:GetAttribute("ID")
+                            if id then
+                                fireRemote({
+                                    {
+                                        {
+                                            "General",
+                                            "Attack",
+                                            "Click",
+                                            { [id] = true },
+                                            n = 3
+                                        },
+                                        _G.Key
+                                    }
+                                })
+                            end
+                        end
+                    end
+                    task.wait(0)
+                end
+            end)
+        end
+    end
+})
+
+_G.TrialSection:AddToggle({
+    Title   = "Auto Tp Enemy",
+    Default = false,
+    Flag    = "trial_auto_tp",
+    Callback = function(state)
+        _G.TrialAutoTp = state
+        if state then
+            task.spawn(function()
+                while _G.TrialAutoTp do
+                    if _G.InTrial then
+                        local enemy = getNearestTrialEnemyAlive(_G.SelectedTrial)
+                        if enemy then
+                            local myHrp = _G.GetRoot()
+                            local pos   = getEnemyPosition(enemy)
+                            if myHrp and pos then
+                                pcall(function() myHrp.CFrame = CFrame.new(pos) end)
+                            end
+                        end
+                    end
+                    task.wait(0)
+                end
+            end)
+        end
+    end
+})
+
+_G.StarsSection = _G.StarsTab:AddSection({
+    Name = "Stars",
+    Open = false
+})
+
+_G.SelectedStar  = nil
+_G.OpenAmount    = 1
+_G.HatchMethod   = "Teleport"
+_G.AutoStar      = false
+
+local RunService = game:GetService("RunService")
+
+local teleportConnection = nil
+local fireLoop           = nil
+
+local function getStarsList()
+    local list = {}
+    local starsFolder = workspace:FindFirstChild("Server")
+        and workspace.Server:FindFirstChild("Stars")
+    if starsFolder then
+        for _, star in pairs(starsFolder:GetChildren()) do
+            local name = star.Name
+            if not table.find(list, name) then
+                table.insert(list, name)
+            end
+        end
+    end
+    table.sort(list)
+    return #list > 0 and list or {"No Stars Found"}
+end
+
+local function getStarInstance(selectedName)
+    local starsFolder = workspace:FindFirstChild("Server")
+        and workspace.Server:FindFirstChild("Stars")
+    if starsFolder then
+        return starsFolder:FindFirstChild(selectedName)
+    end
+    return nil
+end
+
+local function teleportToStar(starInst)
+    local character = LocalPlayer.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+    if not hrp or not starInst then return end
+
+    local cf
+    if starInst:IsA("Model") then
+        cf = starInst:GetPivot()
+    elseif starInst:IsA("BasePart") then
+        cf = starInst.CFrame
+    else
+        return
     end
 
-end)
+    local starPos = cf.Position
+    local lookVec = cf.LookVector
+    local offset  = lookVec * 4 + Vector3.new(0, 10, 0)
+    local spawnPos = starPos + offset
+
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {character}
+    rayParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local result = workspace:Raycast(spawnPos, Vector3.new(0, -20, 0), rayParams)
+    local groundY = result and (result.Position.Y + 3) or (starPos.Y + 3)
+    local finalPos = Vector3.new(spawnPos.X, groundY, spawnPos.Z)
+
+    hrp.CFrame = CFrame.new(finalPos, Vector3.new(starPos.X, finalPos.Y, starPos.Z))
+end
+
+_G.StarsSection:AddDropdown({
+    Title   = "Hatch Method",
+    Options = {"Teleport", "Non Teleport"},
+    Default = "Teleport",
+    Flag    = "hatch_method_wf",
+    Callback = function(v)
+        _G.HatchMethod = type(v) == "table" and v[1] or v
+    end
+})
+
+_G.StarsDropdown = _G.StarsSection:AddDropdown({
+    Title   = "Select Star",
+    Options = getStarsList(),
+    Flag    = "select_star_wf",
+    Callback = function(v)
+        _G.SelectedStar = type(v) == "table" and v[1] or v
+    end
+})
+
+_G.StarsSection:AddButton({
+    Title = "Refresh Stars List",
+    Callback = function()
+        if _G.StarsDropdown then
+            _G.StarsDropdown:Set(getStarsList(), false)
+        end
+    end
+})
+
+_G.StarsSection:AddTextBox({
+    Title           = "Hatch Amount",
+    PlaceholderText = "1",
+    Default         = "1",
+    Flag            = "star_open_amount_wf",
+    Callback = function(v)
+        _G.OpenAmount = tonumber(v) or 1
+    end
+})
+
+_G.StarsSection:AddToggle({
+    Title   = "Auto Hatch",
+    Default = false,
+    Flag    = "auto_hatch_wf",
+    Callback = function(state)
+        _G.AutoStar = state
+
+        if teleportConnection then teleportConnection:Disconnect() teleportConnection = nil end
+        if fireLoop then task.cancel(fireLoop) fireLoop = nil end
+
+        if not state then return end
+
+        fireLoop = task.spawn(function()
+            while _G.AutoStar do
+                if _G.SelectedStar and _G.SelectedStar ~= "No Stars Found" then
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Stars",
+                                "Open",
+                                _G.SelectedStar,
+                                _G.OpenAmount,
+                                n = 5
+                            },
+                            _G.Key
+                        }
+                    })
+                end
+                task.wait(0.1)
+            end
+        end)
+        teleportConnection = RunService.Heartbeat:Connect(function()
+            if not _G.AutoStar then
+                teleportConnection:Disconnect()
+                teleportConnection = nil
+                return
+            end
+            if _G.HatchMethod == "Non Teleport" then return end
+            if not (_G.SelectedStar and _G.SelectedStar ~= "No Stars Found") then return end
+
+            local starInst = getStarInstance(_G.SelectedStar)
+            local character = LocalPlayer.Character
+            local hrp = character and character:FindFirstChild("HumanoidRootPart")
+            if not starInst or not hrp then return end
+
+            local starPos
+            if starInst:IsA("Model") then
+                starPos = starInst:GetPivot().Position
+            elseif starInst:IsA("BasePart") then
+                starPos = starInst.Position
+            end
+            if not starPos then return end
+
+            if (hrp.Position - starPos).Magnitude > 8 then
+                teleportToStar(starInst)
+            end
+        end)
+    end
+})
+
+_G.StarsSection:AddToggle({
+    Title   = "Auto Equip Best Units",
+    Default = false,
+    Flag    = "auto_equip_best",
+    Callback = function(state)
+        _G.AutoEquipBest = state
+        if state then
+            task.spawn(function()
+                while _G.AutoEquipBest do
+                    fireRemote({
+                        {
+                            {
+                                "General",
+                                "Units",
+                                "EquipBest",
+                                "Power",
+                                n = 4
+                            },
+                            _G.Key
+                        }
+                    })
+                    task.wait(15)
+                end
+            end)
+        end
+    end
+})
+
+_G.CodesSection = _G.MiscTab:AddSection({
+    Name = "All Codes",
+    Open = false
+})
+
+_G.Codes = {
+    "RELEASE", "SRRY4SHUTDOWN", "SRRY4SHUTDOWN2", "TIOGADIHIT!", 
+    "THX1KCCU", "2KCCU!", "THANKYOU3KCCU", "4KONCHAMBER!", 
+    "ALREADY5K?", "6KTHXSOMUCH", "7KISALOT!", "THANKS1KLIKES", 
+    "100KVISITSONCHAMBER!", "SRRY4SHUTDOWN3"
+}
+
+_G.SelectedCode = _G.Codes[1]
+
+local function redeemCode(code)
+    fireRemote({
+        {
+            {
+                "General",
+                "Codes",
+                "Redeem",
+                code,
+                n = 4
+            },
+            _G.Key
+        }
+    })
+end
+
+_G.CodesSection:AddDropdown({
+    Title = "Select Code",
+    Options = _G.Codes,
+    Default = _G.SelectedCode,
+    Flag = "select_code",
+    Callback = function(v)
+        _G.SelectedCode = v
+    end
+})
+
+_G.CodesSection:AddButton({
+    Title = "Redeem Select Code",
+    Callback = function()
+        redeemCode(_G.SelectedCode)
+    end
+})
+
+_G.AutoCodes = false
+_G.CodesSection:AddToggle({
+    Title = "Redeem All Codes",
+    Default = false,
+    Flag = "redeem_all_codes",
+    Callback = function(state)
+        _G.AutoCodes = state
+        if state then
+            task.spawn(function()
+                while _G.AutoCodes do
+                    for _, code in pairs(_G.Codes) do
+                        if not _G.AutoCodes then break end
+                        redeemCode(code)
+                        task.wait(1)
+                    end
+                    task.wait(2)
+                end
+            end)
+        end
+    end
+})
+
+_G.GachaSection = _G.MiscTab:AddSection({
+    Name = "Gacha",
+    Open = false
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BridgeRemote = ReplicatedStorage:WaitForChild("BridgeNet"):WaitForChild("dataRemoteEvent")
+local MachinesFolder = ReplicatedStorage:WaitForChild("Omni"):WaitForChild("Shared"):WaitForChild("Gacha"):WaitForChild("Machines")
+
+_G.SelectedGacha = ""
+_G.AutoRollSelected = false
+_G.AutoRollAll = false
+
+local function getGachaList()
+    local list = {}
+    for _, v in pairs(MachinesFolder:GetChildren()) do
+        if v.Name ~= "For Updates" then
+            table.insert(list, v.Name)
+        end
+    end
+    table.sort(list)
+    return list
+end
+
+local function fireGacha(name)
+    local args = {
+        {
+            {
+                "General",
+                "Gacha",
+                "Roll",
+                name,
+                {},
+                n = 5
+            },
+            _G.Key
+        }
+    }
+    BridgeRemote:FireServer(unpack(args))
+end
+
+_G.GachaList = getGachaList()
+_G.SelectedGacha = _G.GachaList[1] or ""
+
+_G.GachaDropdown = _G.GachaSection:AddDropdown({
+    Title = "Select Gacha",
+    Options = _G.GachaList,
+    Default = _G.SelectedGacha,
+    Flag = "select_gacha",
+    Callback = function(v)
+        _G.SelectedGacha = v
+    end
+})
+
+_G.GachaSection:AddButton({
+    Title = "Refresh Gacha List",
+    Callback = function()
+        _G.GachaList = getGachaList()
+        _G.GachaDropdown:Set(_G.GachaList, false)
+    end
+})
+
+_G.GachaSection:AddButton({
+    Title = "Roll Selected",
+    Callback = function()
+        if _G.SelectedGacha ~= "" then
+            fireGacha(_G.SelectedGacha)
+        end
+    end
+})
+
+_G.GachaSection:AddToggle({
+    Title = "Auto Roll Selected",
+    Default = false,
+    Callback = function(state)
+        _G.AutoRollSelected = state
+        if state then
+            task.spawn(function()
+                while _G.AutoRollSelected do
+                    if _G.SelectedGacha ~= "" then
+                        fireGacha(_G.SelectedGacha)
+                    end
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
+
+_G.GachaSection:AddToggle({
+    Title = "Auto Roll All",
+    Default = false,
+    Callback = function(state)
+        _G.AutoRollAll = state
+        if state then
+            task.spawn(function()
+                while _G.AutoRollAll do
+                    for _, name in pairs(_G.GachaList) do
+                        if not _G.AutoRollAll then break end
+                        fireGacha(name)
+                        task.wait(_G.RollDelay)
+                    end
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end
+})
+
+_G.TrialSection = _G.MiscTab:AddSection({
+    Name = "Trial Upgrades",
+    Open = false
+})
+
+local ListFolder = game:GetService("Players").LocalPlayer.PlayerGui.UI.Frames.Upgrade.Background.Main.List
+
+_G.SelectedUpgrade = ""
+_G.AutoUpgrade = false
+_G.AutoUpgradeAll = false
+
+local UpgradeNames = {
+    "Damage",
+    "Crystals",
+    "Attack Speed",
+    "Attack Distance",
+    "Power"
+}
+
+local function fireUpgrade(name)
+    fireRemote({
+        {
+            {
+                "General",
+                "Upgrade",
+                "Upgrade",
+                "Trial Upgrades",
+                name,
+                n = 5
+            },
+            _G.Key
+        }
+    })
+end
+
+_G.SelectedUpgrade = UpgradeNames[1]
+
+_G.UpgradeDropdown = _G.TrialSection:AddDropdown({
+    Title = "Select Upgrade",
+    Options = UpgradeNames,
+    Default = _G.SelectedUpgrade,
+    Flag = "select_upgrade",
+    Callback = function(v)
+        _G.SelectedUpgrade = v
+    end
+})
+
+_G.TrialSection:AddButton({
+    Title = "Upgrade Selected",
+    Callback = function()
+        if _G.SelectedUpgrade ~= "" then
+            fireUpgrade(_G.SelectedUpgrade)
+        end
+    end
+})
+
+_G.TrialSection:AddToggle({
+    Title = "Auto Upgrade",
+    Default = false,
+    Flag = "auto_upgrade",
+    Callback = function(state)
+        _G.AutoUpgrade = state
+        if state then
+            task.spawn(function()
+                while _G.AutoUpgrade do
+                    if _G.SelectedUpgrade ~= "" then
+                        fireUpgrade(_G.SelectedUpgrade)
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+    end
+})
+
+_G.TrialSection:AddToggle({
+    Title = "Auto Upgrade All",
+    Default = false,
+    Flag = "auto_upgrade_all",
+    Callback = function(state)
+        _G.AutoUpgradeAll = state
+        if state then
+            task.spawn(function()
+                while _G.AutoUpgradeAll do
+                    for _, name in pairs(UpgradeNames) do
+                        if not _G.AutoUpgradeAll then break end
+                        fireUpgrade(name)
+                        task.wait(1)
+                    end
+                    task.wait(2)
+                end
+            end)
+        end
+    end
+})
+
+_G.FrameSection = _G.MiscTab:AddSection({
+    Name = "Interact Frames",
+    Open = false
+}) 
+
+local framesPath = game:GetService("Players").LocalPlayer.PlayerGui:WaitForChild("UI").Frames
+
+_G.SelectedFrameName = ""
+
+local function getFramesList()
+    local list = {}
+    for _, frame in pairs(framesPath:GetChildren()) do
+        if frame:IsA("GuiObject") then
+            table.insert(list, frame.Name)
+        end
+    end
+    table.sort(list)
+    return list
+end
+
+_G.FrameDropdown = _G.FrameSection:AddDropdown({
+    Title = "Select Frame",
+    Options = getFramesList(),
+    Default = "",
+    Flag = "selected_frame_interact",
+    Callback = function(v)
+        _G.SelectedFrameName = v
+    end
+})
+
+_G.FrameSection:AddButton({
+    Title = "Refresh Frames List",
+    Callback = function()
+        _G.FrameDropdown:Set(getFramesList(), false)
+    end
+})
+
+_G.FrameSection:AddButton({
+    Title = "Show Selected Frame",
+    Callback = function()
+        if _G.SelectedFrameName ~= "" then
+            local frame = framesPath:FindFirstChild(_G.SelectedFrameName)
+            if frame then
+                frame.Visible = true
+            end
+        end
+    end
+})
+
+_G.FrameSection:AddButton({
+    Title = "Hide Selected Frame",
+    Callback = function()
+        if _G.SelectedFrameName ~= "" then
+            local frame = framesPath:FindFirstChild(_G.SelectedFrameName)
+            if frame then
+                frame.Visible = false
+            end
+        end
+    end
+})
+
+_G.MiscTab:AddDivider("More Coming Soon")
+
+_G.LibrarySection = _G.SettingsTab:AddSection({
+	Name = "Library",
+	Open = false
+})
+
+_G.LibrarySection:AddDropdown({
+    Title = "UI Theme",
+    Options = {
+        "Darker", "Dark", "Purple", "Ocean", "Crimson", "Emerald",
+        "Sunset", "Midnight", "Rose", "Monochrome", "Arctic", "Amber",
+        "Neon", "Sakura", "Forest", "Lava", "Aqua", "Sand",
+        "Lilac", "Slate", "Toxic", "Copper", "Glacier", "Obsidian",
+        "Peach", "Cobalt", "Infrared", "Teal", "Gold", "Void",
+        "Mint", "Blush", "Dusk", "Storm", "Rust", "Jade",
+        "Horizon", "Plum", "IceBlue", "Mocha", "Magenta", "Carbon",
+        "Marine", "Parchment", "Indigo", "Scarlet", "Blossom", "Eclipse",
+        "Olive", "Frostbite", "Ember", "Nautical", "Vine", "Cinder",
+        "Cosmos", "Mushroom", "Pixel", "Holographic", "Candy", "Titan",
+        "Flame", "Mist", "Orchid", "Bronze", "Neptune", "Glacier2", "Ruby",
+        "Hazel", "Moonlight", "Citrus", "Lagoon", "Phantom", "Tangerine",
+        "Electric", "Sepia", "Haze", "Iron", "Meadow", "Vapor", "Nordic",
+        "Velvet", "Dawn", "Phosphor", "Noir", "Wildfire", "Polar",
+        "Shadow", "Prism", "Cacao", "Starlight", "Seafoam", "Lapis",
+        "Spice", "Matrix", "Bismuth", "Glow", "Terra", "Rift", "Basalt",
+        "Wildberry"
+    },
+    Default = "Darker",
+    Flag = "ui_theme",
+    Callback = function(value)
+        if _G.Window then
+            _G.Window:SetTheme(value)
+        end
+    end
+})
+
+_G.LibrarySection:AddSlider({
+    Title = "UI Transparency",
+    Min = 0,
+    Max = 30,
+    Default = 0,
+    Flag = "ui_transparency",
+    Callback = function(value)
+        if _G.Window then
+            _G.Window:SetTransparency(value / 100)
+        end
+    end
+})
+
+_G.ServersSection = _G.SettingsTab:AddSection({
+	Name = "Servers",
+	Open = false
+})
+
+local serverIdParagraph = _G.ServersSection:AddParagraph({
+    Title = "Server Id",
+    Text = tostring(game.JobId)
+})
+
+_G.ServersSection:AddButton({
+    Title = "Copy Server Id",
+    Callback = function()
+        setclipboard(tostring(game.JobId))
+    end
+})
+
+local enteredServerId = ""
+
+_G.ServersSection:AddTextBox({
+    Title = "Enter Server Id",
+    PlaceholderText = "Paste server id here...",
+    Default = "",
+    Flag = "enter_server_id",
+    Callback = function(value)
+        enteredServerId = value
+    end
+})
+
+_G.ServersSection:AddButton({
+    Title = "Join Server",
+    Callback = function()
+        if enteredServerId ~= "" then
+            local success, err = pcall(function()
+                game:GetService("TeleportService"):TeleportToPlaceInstance(
+                    game.PlaceId,
+                    enteredServerId,
+                    game:GetService("Players").LocalPlayer
+                )
+            end)
+            if not success then
+                warn("Join Server failed:", err)
+            end
+        else
+            warn("Server Id is empty!")
+        end
+    end
+})
+
+_G.ServersSection:AddDivider("》Anti Afk | Auto Rejoin《")
+
+_G.ServersSection:AddToggle({
+    Title = "Anti Afk",
+    Default = false,
+    Flag = "anti_afk",
+    Callback = function(state)
+        _G.antiAfkEnabled = state
+        
+        if state then
+            local player = game:GetService("Players").LocalPlayer
+            local VirtualUser = game:GetService("VirtualUser")
+            
+            _G.AntiAfkConnection = player.Idled:Connect(function()
+                VirtualUser:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                VirtualUser:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            end)
+            print("✅ Anti AFK enabled")
+        else
+            if _G.AntiAfkConnection then
+                _G.AntiAfkConnection:Disconnect()
+                _G.AntiAfkConnection = nil
+            end
+            print("❌ Anti AFK disabled")
+        end
+    end
+})
+
+_G.ServersSection:AddToggle({
+    Title = "Auto Rejoin",
+    Default = false,
+    Flag = "auto_rejoin",
+    Callback = function(Value)
+        _G.AutoRejoin = Value
+        
+        if Value then
+            -- Создаем отдельный поток для проверки
+            _G.AutoRejoinThread = task.spawn(function()
+                while _G.AutoRejoin do
+                    if game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui") then
+                        local promptOverlay = game:GetService("CoreGui").RobloxPromptGui:FindFirstChild("promptOverlay")
+                        if promptOverlay and promptOverlay:FindFirstChild("ErrorPrompt") then
+                            task.wait(1)
+                            game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+                        end
+                    end
+                    task.wait(1)
+                end
+            end)
+        else
+            if _G.AutoRejoinThread then
+                task.cancel(_G.AutoRejoinThread)
+                _G.AutoRejoinThread = nil
+            end
+        end
+    end
+})
+
+_G.ServersSection:AddDivider("》Rejoin | Server Hop《")
+
+_G.ServersSection:AddButton({
+    Title = "Rejoin Server",
+    Callback = function()
+        local success, errorMsg = pcall(function()
+            game:GetService("TeleportService"):Teleport(game.PlaceId, game:GetService("Players").LocalPlayer)
+        end)
+        
+        if not success then
+            warn("Rejoin failed:", errorMsg)
+        end
+    end
+})
+
+_G.ServersSection:AddButton({
+    Title = "Server Hop",
+    Callback = function()
+        local function ServerHop()
+            local PlaceID = game.PlaceId
+            local AllIDs = {}
+            local foundAnything = ""
+            local attempt = 1
+            
+            local function TPReturner()
+                local Site
+                if foundAnything == "" then
+                    Site = game:GetService("HttpService"):JSONDecode(game:HttpGet(
+                        'https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'
+                    ))
+                else
+                    Site = game:GetService("HttpService"):JSONDecode(game:HttpGet(
+                        'https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything
+                    ))
+                end
+                
+                if Site and Site.data then
+                    for _, v in pairs(Site.data) do
+                        if tonumber(v.maxPlayers) > tonumber(v.playing) and v.id ~= game.JobId then
+                            game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, v.id, game.Players.LocalPlayer)
+                            return true
+                        end
+                    end
+                    
+                    foundAnything = Site.nextPageCursor
+                end
+                return false
+            end
+            
+            while attempt <= 3 do
+                if TPReturner() then
+                    return
+                end
+                attempt = attempt + 1
+                task.wait(2)
+            end
+        end
+        
+        local success, err = pcall(ServerHop)
+        if not success then
+            warn("Server hop failed:", err)
+        end
+    end
+})
+
+_G.ServersSection:AddButton({
+    Title = "Join Small Server",
+    Callback = function()
+        local function JoinSmallServer()
+            local PlaceID = game.PlaceId
+            local response = game:GetService("HttpService"):JSONDecode(game:HttpGet(
+                'https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'
+            ))
+            
+            if response and response.data then
+                local BestServer = nil
+                local LowestPlayers = math.huge
+                
+                for _, server in pairs(response.data) do
+                    if server.playing > 0 and server.playing < LowestPlayers and server.id ~= game.JobId then
+                        LowestPlayers = server.playing
+                        BestServer = server
+                    end
+                end
+                
+                if BestServer then
+                    game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, BestServer.id, game.Players.LocalPlayer)
+                else
+                    warn("No suitable server found")
+                end
+            end
+        end
+        
+        local success, err = pcall(JoinSmallServer)
+        if not success then
+            warn("Join small server failed:", err)
+        end
+    end
+})
 
 Window:Dialog({
-    Title = "Welcome!",
-    Text = "World Fighters script loaded successfully!",
+    Title   = "Welcome!",
+    Text    = "World Fighters Loaded Successfully!",
     Options = {
         {"OK", function() end}
     }
