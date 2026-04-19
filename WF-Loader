@@ -44,9 +44,9 @@ end
 _G.Window = Window
 
 _G.Key    = "\002"
-_G.NumberOne = 3
-_G.NumberTwo = 4
-_G.NumberFour = 5
+_G.NumberOne = "3"
+_G.NumberTwo = "4"
+_G.NumberFour = "5"
 
 local function fireRemote(args)
     pcall(function()
