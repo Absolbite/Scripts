@@ -2,20 +2,20 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
-if game.PlaceId ~= 111173250236559 then
+if game.PlaceId ~= 95630541662383 then
     return
 end
 
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Absolbite/Library/refs/heads/main/V6-Section", true))()
 
 local Window = redzlib:MakeWindow({
-    Name = "Anime Crash",
+    Name = "World Fighters",
     SubTitle = "ScriptBlox: ChDrago",
-    SaveFolder = "AnimeCrash"
+    SaveFolder = "WorldFighters"
 })
 
 Window:AddTag({
-    "Version 1.0.1",
+    "Version 1.0.1 [Beta]",
 })
 
 Window:AddMinimizeButton({
@@ -43,15 +43,21 @@ end
 
 _G.Window = Window
 
+_G.Key    = "\002"
+
+local function fireRemote(args)
+    pcall(function()
+        RS:WaitForChild("BridgeNet"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+    end)
+end
+
 _G.DiscordTab = Window:MakeTab({ Title = "》Discord《" })
 _G.StatusTab = Window:MakeTab({ Title = "》Status《" })
-_G.MainTab   = Window:MakeTab({ Title = "》Main《" })
-_G.EnemyTab  = Window:MakeTab({ Title = "》Enemy《" })
-_G.SummonTab = Window:MakeTab({ Title = "》Summon《" })
-_G.MiscTab   = Window:MakeTab({ Title = "》Misc《" })
+_G.MainTab  = Window:MakeTab({ Title = "》Main《" })
+_G.EnemyTab = Window:MakeTab({ Title = "》Enemy《" })
+_G.StarsTab = Window:MakeTab({ Title = "》Stars《" })
+_G.MiscTab  = Window:MakeTab({ Title = "》Misc《" })
 _G.SettingsTab   = Window:MakeTab({ Title = "》Settings《" })
-
-_G.KEY = "\005"
 
 local function loadModule(url)
     pcall(function()
@@ -64,7 +70,7 @@ task.spawn(function()
     local base = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/"
 
     local modules = {
-        "ACrash",
+        "WF",
     }
 
     for _, name in ipairs(modules) do
@@ -75,7 +81,7 @@ end)
 
 Window:Dialog({
     Title = "Welcome!",
-    Text = "Anime Crash script loaded successfully!",
+    Text = "World Fighters script loaded successfully!",
     Options = {
         {"OK", function() end}
     }
