@@ -1,4 +1,0 @@
-_G.ChatParagraph = _G.ChatTab:AddParagraph({
-    Title = "Chat is disabled",
-    Text = " "
-})
