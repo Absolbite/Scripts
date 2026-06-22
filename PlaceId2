@@ -9,7 +9,8 @@ local PlaceScripts = {
     [117562712988401] = "https://raw.githubusercontent.com/Absolbite/AEVO/refs/heads/main/Loader",
     [95630541662383]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/WF-Loader",
     [114204398207377] = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/sza",
-    [98927955463992]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/sza"
+    [98927955463992]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/sza",
+    [537413528]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Babft"
 }
 
 local placeId = game.PlaceId
