@@ -10,7 +10,8 @@ local PlaceScripts = {
     [95630541662383]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/WF-Loader",
     [114204398207377] = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Games/sza",
     [98927955463992]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Games/sza",
-    [537413528]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Babft"
+    [537413528]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Babft",
+    [126229277218112]  = "https://raw.githubusercontent.com/Absolbite/Scripts/refs/heads/main/Games/Ab"
 }
 
 local placeId = game.PlaceId
