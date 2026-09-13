@@ -1603,7 +1603,26 @@ local function tablecheck(tabletocheck,instance,id)
     return tabletocheck[id] or tabletocheck[instance.Name]
 end
 
+local ignoreRemotes = {
+    ["bodyMovementEvent"] = true,
+    ["Ping"] = true,
+}
+
+local function shouldIgnoreRemote(data)
+    local remote = data.remote
+    local name = typeof(remote) == "table" and remote.Name or remote.Name
+    if ignoreRemotes[name] then
+        return true
+    end
+    -- UUID-named remotes under BadgeService
+    if typeof(remote) == "Instance" and remote.Parent and remote.Parent.ClassName == "BadgeService" then
+        return true
+    end
+    return false
+end
+
 function remoteHandler(data)
+    if shouldIgnoreRemote(data) then return end
     if configs.autoblock then
         local id = data.id
 
